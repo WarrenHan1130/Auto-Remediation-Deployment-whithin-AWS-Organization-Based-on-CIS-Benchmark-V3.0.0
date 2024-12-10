@@ -12,7 +12,7 @@ In this project on resource monitoring and non-compliant resource remediation, w
 ## Contents
 
 - [Introduction](#Introduction)
-- [Framework Design](#Framework Design)
+- [Framework Design](#Framework-Design)
 
 </details>
 
@@ -35,3 +35,5 @@ CIS Benchmark is a series of globally recognized security configuration guides d
 The CIS AWS Foundations Benchmark is a security configuration benchmark designed by the Center for Internet Security (CIS) specifically for Amazon Web Services (AWS) environments. This set of guidelines provides best practices for AWS accounts and services to help organizations ensure the security and compliance of their cloud resources, including identity and access management (IAM), logging, monitoring, and network configuration. It provides AWS users with more targeted security monitoring and remediation of non-compliant resources.
 
 ## 1.3 CISv3.0.0 Recommended Controls
+
+# 2. Framework Design
