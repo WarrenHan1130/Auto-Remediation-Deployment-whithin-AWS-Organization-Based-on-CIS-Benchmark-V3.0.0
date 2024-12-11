@@ -317,7 +317,8 @@ Cost management helps users track and optimize resource usage more efficiently.
 
 In addition, Service Catalog's centralized management capabilities support cross-account and multi-region product deployments, enabling organizations to maintain consistency and efficiency in large-scale environments.
 
-<span style = "color:red">Note: All of the template code used in Service Catalog is the same as that used in CloudFormation. Therefore, when using Service Catalog products, please follow the same procedure as before. The section here only provides how to create and share Service Catalog products.</span>
+### **🚨 Note:**
+*All of the template code used in Service Catalog is the same as that used in CloudFormation. Therefore, when using Service Catalog products, please follow the same procedure as before. The section here only provides how to create and share Service Catalog products.*
 
 ### 4.3.1 Management Account Set Up
 
