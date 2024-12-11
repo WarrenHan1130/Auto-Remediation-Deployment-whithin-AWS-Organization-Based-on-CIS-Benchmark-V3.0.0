@@ -1,0 +1,305 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Enable AWS Config
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Resources records selection
+        Parameters:
+          - AllSupported
+          - IncludeGlobalResourceTypes
+          - ResourceTypes
+          - RecordingFrequency
+      - Label:
+          default: Delivery Channel Configuration
+        Parameters:
+          - DeliveryChannelName
+          - Frequency
+      - Label:
+          default: Delivery Notifications
+        Parameters:
+          - TopicArn
+          - NotificationEmail
+    ParameterLabels:
+      AllSupported:
+        default: Record all supported AWS resources types
+      IncludeGlobalResourceTypes:
+        default: Record global resource types (e.g., IAM resources, S3 buckets)
+      ResourceTypes:
+        default: Record selected recource types
+      RecordingFrequency:
+        default: Configuration recorder recording frequency
+      DeliveryChannelName:
+        default: Name for configuration snapshots
+      Frequency:
+        default: Snapshot delivery frequency
+      TopicArn:
+        default: SNS topic ARN
+      NotificationEmail:
+        default: Notification Email (optional)
+
+Parameters:
+  AllSupported:
+    Type: String
+    Default: True
+    Description: Indicates whether to record all supported AWS resource types, excluding the global IAM resource types.
+    AllowedValues:
+      - true
+      - False
+
+  IncludeGlobalResourceTypes:
+    Type: String
+    Default: False
+    Description: Indicates whether to record the global IAM resources.
+    AllowedValues:
+      - True
+      - False
+
+  ResourceTypes:
+    Type: List<String>
+    Description: Select the specific resources to be recorded, such as AWS::EC2::Instance or AWS::CloudTrail::Trail.
+    Default: None
+  
+  RecordingFrequency:
+    Type: String
+    Description: The frequency with which AWS Config Recorder records configuration changes.
+    Default: CONTINUOUS
+    AllowedValues:
+      - CONTINUOUS
+      - DAILY
+
+  DeliveryChannelName:
+    Type: String
+    Default: DefaultConfigChannel
+    Description: The name of the delivery channel.
+
+  Frequency:
+    Type: String
+    Default: 1hour
+    Description: The frequency of AWS Config delivers configuration snapshots (e.g., 6hours, 12hours, 18hours).
+    AllowedValues:
+      - 1hour
+      - 3hours
+      - 6hours
+      - 12hours
+      - 24hours
+
+  TopicArn:
+    Type: String
+    Default: AutoGenerate
+    Description: The ARN of the SNS topic to which AWS Config sends notifications. Leave 'AutoGenerate' to create a new SNS topic automatically. Otherwise, put the valid ARN.
+
+  NotificationEmail:
+    Type: String
+    Default: None
+    Description: Email address for AWS Config notifications (for new topics).
+
+Conditions:
+  IsAllSupported: !Equals
+    - !Ref AllSupported
+    - True
+
+  IsIncludeGlobalResourceTypes: !Equals
+    - !Ref IncludeGlobalResourceTypes
+    - True 
+
+  IsGeneratedDeliveryChannelName: !Equals
+    - !Ref DeliveryChannelName
+    - ""
+  
+  IsGenerateSNSARN: !Equals
+    - !Ref TopicArn
+    - AutoGenerate
+
+  ShouldCreateSubcription: !And
+    - !Condition IsGenerateSNSARN
+    - !Not
+      - !Equals
+        - !Ref NotificationEmail
+        - None
+
+Mappings:
+  SnapshotSettings:
+    FrequencyMap:
+      1hour   : One_Hour
+      3hours  : Three_Hours
+      6hours  : Six_Hours
+      12hours : Twelve_Hours
+      24hours : TwentyFour_Hours
+
+Resources:
+
+  S3Bucket:
+    DeletionPolicy: Retain
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument: 
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PermissionsCheck
+            Effect: Allow
+            Principal:
+              Service:
+                - config.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}"
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref "AWS::AccountId"
+          - Sid: AWSConfigBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service:
+                - config.amazonaws.com
+            Action: s3:ListBucket
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}"
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref "AWS::AccountId"
+          - Sid: AWSConfigLogWrite
+            Effect: Allow
+            Principal:
+              Service:
+                - config.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}/AWSLogs/${AWS::AccountId}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref "AWS::AccountId"
+          - Sid: AWSConfigLogRead
+            Effect: Allow
+            Principal:
+              Service:
+                - config.amazonaws.com
+            Action: s3:GetObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}/AWSLogs/${AWS::AccountId}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref "AWS::AccountId"
+          - Sid: PreventHTTPConnect
+            Action:
+              - s3:*
+            Effect: Deny
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
+            Principal: "*"
+            Condition:
+              Bool:
+                aws:SecureTransport:
+                  false
+
+  CreateSNSTopic:
+    Condition: IsGenerateSNSARN
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "config-topic-${AWS::AccountId}"
+      DisplayName: AWS Config Notifications
+      KmsMasterKeyId: "alias/aws/sns"
+
+  SNSTopicPolicy:
+    Condition: IsGenerateSNSARN
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: 
+        - !Ref CreateSNSTopic
+      PolicyDocument:
+        Statement:
+          - Sid: AWSConfigSNSPolicy
+            Action:
+              - sns:Publish
+            Effect: Allow
+            Resource: !Ref CreateSNSTopic
+            Principal:
+              Service:
+                - config.amazonaws.com
+
+  EmailNotification:
+    Condition: ShouldCreateSubcription
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref NotificationEmail
+      Protocol: email
+      TopicArn: !Ref CreateSNSTopic
+
+  AWSConfigRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - config.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWS_ConfigRole"
+      Policies:
+        - PolicyName: ConfigSNSFullAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "sns:*"
+                Resource: !If
+                - IsGenerateSNSARN
+                - !Ref CreateSNSTopic
+                - !Ref TopicArn
+
+  ConfigRecorder:
+    Type: AWS::Config::ConfigurationRecorder
+    DependsOn:
+      - S3BucketPolicy
+    Properties:
+      RoleARN: !GetAtt AWSConfigRole.Arn
+      RecordingGroup:
+        AllSupported: !Ref AllSupported
+        IncludeGlobalResourceTypes: !Ref IncludeGlobalResourceTypes
+        ResourceTypes: !If
+          - IsAllSupported
+          - !Ref AWS::NoValue
+          - !Ref ResourceTypes
+      RecordingMode:
+        RecordingFrequency: !If
+          - IsAllSupported
+          - CONTINUOUS
+          - !Ref RecordingFrequency
+
+  ConfigDeliveryChannel:
+    Type: AWS::Config::DeliveryChannel
+    DependsOn:
+      - S3BucketPolicy
+    Properties:
+      Name: !If
+        - IsGeneratedDeliveryChannelName
+        - !Ref AWS::NoValue
+        - !Ref DeliveryChannelName
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: !FindInMap
+          - SnapshotSettings
+          - FrequencyMap
+          - !Ref Frequency
+      S3BucketName: !Ref S3Bucket
+      SnsTopicARN: !If
+        - IsGenerateSNSARN
+        - !Ref CreateSNSTopic
+        - !Ref TopicArn

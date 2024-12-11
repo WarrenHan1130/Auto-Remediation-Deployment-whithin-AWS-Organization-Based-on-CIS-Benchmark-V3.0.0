@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates an IAM Role in Organization Member accounts for CIS Remediation.
+
+Parameters:
+  RemediationLambdaRoleARN:
+    Description: Enter the ARN of the IAM Role for Lambda function's excution in Delegated Secutiry Hub Account
+    Type: String
+  RoleName:
+    Description: Enter the name of the IAM Role to create
+    Type: String
+    Default: "CIS_Remediator_Role"
+
+Resources:
+  CISRemediatorRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref RemediationLambdaRoleARN
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
