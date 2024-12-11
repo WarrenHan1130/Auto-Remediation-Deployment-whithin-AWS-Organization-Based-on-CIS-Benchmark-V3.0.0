@@ -3,7 +3,7 @@ Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guid
 
 In this project on resource monitoring and non-compliant resource remediation, we will mainly use Cloud Formation, AWS Config, Security Hub, Event Bridge, and Lambda Function from AWS resources.
 
-**Last updated - Nov 2024**
+```Last updated - Nov 2024```
 
 # Catalogs
 <details>
@@ -128,7 +128,7 @@ The implementation of this part comes mainly from an article called ["Disabling 
 # 4. Environment Setup
 This section explains how to deploy an automated remediation solution within an AWS Organization using the management account.
 
-<span style = "color:red">Note: Any platform code deployed at the organization level will not be applied to the management account. This aligns with the principle of least privilege for the management account, meaning users should avoid setting up resources or configurations directly on the management account. This approach enhances the security of the management account by reducing its exposure and ensuring it does not require security checks for managed resources.</span>
+<code style = "color:red">Note: Any platform code deployed at the organization level will not be applied to the management account. This aligns with the principle of least privilege for the management account, meaning users should avoid setting up resources or configurations directly on the management account. This approach enhances the security of the management account by reducing its exposure and ensuring it does not require security checks for managed resources.</code>
 
 ## 4.1 Delegated Administrator Account Set Up - Account Level
 In this part users need to make some manual settings for the Delegated Administrator Account of Security Hub. 
