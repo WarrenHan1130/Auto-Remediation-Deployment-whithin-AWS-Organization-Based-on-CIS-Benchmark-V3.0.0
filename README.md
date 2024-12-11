@@ -1,27 +1,28 @@
-# Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
+# 🌐 Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
+
 Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guide to securely use AWS cloud resources in large organizations through automated means.
 
 In this project on resource monitoring and non-compliant resource remediation, we will mainly use Cloud Formation, AWS Config, Security Hub, Event Bridge, and Lambda Function from AWS resources.
 
 ```Last updated - Nov 2024```
 
-# Catalogs
+# 📚 Catalogs
 <details>
-<summary>Lists</summary>
+<summary>📂 Lists</summary>
 
 ## Contents
 
-- [Introduction](#1-introduction)
+- 📘 [Introduction](#-1-introduction)
     - [1.1 Background](#11-Background)
     - [1.2 CIS Benchmark and CIS AWS Foundations Benchmark](#12-CIS-Benchmark-and-CIS-AWS-Foundations-Benchmark)
     - [1.3 CISv3.0.0 Recommended Controls](#13-CISv300-Recommended-Controls)
-- [Framework Design](#2-framework-design)
+- 💡 [Framework Design](#-2-framework-design)
     - [2.1 Non-compliant Resource Detection](#21-non-compliant-resource-detection)
     - [2.2 Integration of Detection Results](#22-integration-of-detection-results)
     - [2.3 Non-compliant Resource Remediation](#23-non-compliant-resource-remediation)
     - [2.4 (Optional) Adjustment of Detection Rules](#24-optional-adjustment-of-detection-rules)
-- [Required AWS Serivce](#3-Required-AWS-Service)
-- [Environment Setup](#4-Environment-Setup)
+- ⚙️ [Required AWS Serivce](#️-3-required-aws-serivce)
+- 🛠️ [Environment Setup](#️-4-environment-setup)
 	- [4.1 Delegated Administrator Account Set Up - Account Level](#41-delegated-administrator-account-set-up---account-level)
 		- [4.1.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub](#411-set-the-member-account-to-be-the-delegated-administrator-account-for-the-security-hub)
     	- [4.1.2 Set Configuration in the Delegated Administrator Account](#412-set-configuration-in-the-delegated-administrator-account)
@@ -40,7 +41,7 @@ In this project on resource monitoring and non-compliant resource remediation, w
 
 </details>
 
-# 1. Introduction
+# 📘 1. Introduction
 
 ## 1.1 Background
 With the rapid popularization of cloud computing, cloud resources have become the core platform for enterprises and individuals to store, process, and manage data. With cloud resources, enterprises can obtain high-performance computing power at a lower cost and easily achieve global service coverage with its high flexibility.
@@ -62,7 +63,7 @@ The CIS AWS Foundations Benchmark is a security configuration benchmark designed
 
 ## 1.3 CISv3.0.0 Recommended Controls
 
-# 2. Framework Design
+# 💡 2. Framework Design
 The framework shown in the figure reflects the overall design concept of the project. The implementation of the entire framework will be divided into four parts:
 
 Part 1. Non-compliant Resource Detection
@@ -112,7 +113,7 @@ This optional part will allow users to manually enable or disable a particular d
 
 The implementation of this part comes mainly from an article called ["Disabling Security Hub controls in a multi-account environment"](https://aws.amazon.com/blogs/security/disabling-security-hub-controls-in-a-multi-account-environment/). See the corresponding [GitHub](https://github.com/aws-samples/aws-security-hub-cross-account-controls-disabler) for details.
 
-# 3. Required AWS Serivce
+# ⚙️ 3. Required AWS Serivce
 1. [AWS Config](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html): A service that continuously monitors and evaluates the configuration of AWS resources against predefined or custom compliance rules.
 
 2. [AWS Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html): A centralized service that provides comprehensive security visibility, consolidating findings from multiple AWS services and third-party tools.
@@ -125,7 +126,7 @@ The implementation of this part comes mainly from an article called ["Disabling 
 
 6. [AWS CloudFormation](https://docs.aws.amazon.com/cloudformation/): A service that simplifies infrastructure management by allowing users to define, provision, and manage AWS resources using declarative code templates, ensuring consistent and repeatable deployments.
 
-# 4. Environment Setup
+# 🛠️ 4. Environment Setup
 This section explains how to deploy an automated remediation solution within an AWS Organization using the management account.
 
 ### **🚨 Note:**
