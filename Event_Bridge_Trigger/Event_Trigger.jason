@@ -1,0 +1,15 @@
+{
+  "source": ["aws.securityhub"],
+  "detail-type": ["Security Hub Findings - Imported"],
+  "detail": {
+    "findings": {
+      "Compliance": {
+        "Status": ["FAILED"]
+      },
+      "Workflow": {
+        "Status": ["NEW"]
+      },
+      "GeneratorId": ["cis-aws-foundations-benchmark/v/3.0.0/1.2", "cis-aws-foundations-benchmark/v/3.0.0/1.4", "cis-aws-foundations-benchmark/v/3.0.0/1.5", "cis-aws-foundations-benchmark/v/3.0.0/1.6", "cis-aws-foundations-benchmark/v/3.0.0/1.8", "cis-aws-foundations-benchmark/v/3.0.0/1.9", "cis-aws-foundations-benchmark/v/3.0.0/1.10", "cis-aws-foundations-benchmark/v/3.0.0/1.12", "cis-aws-foundations-benchmark/v/3.0.0/1.14", "cis-aws-foundations-benchmark/v/3.0.0/1.15", "cis-aws-foundations-benchmark/v/3.0.0/1.17", "cis-aws-foundations-benchmark/v/3.0.0/1.19", "cis-aws-foundations-benchmark/v/3.0.0/1.20", "cis-aws-foundations-benchmark/v/3.0.0/1.22", "cis-aws-foundations-benchmark/v/3.0.0/2.2.1", "cis-aws-foundations-benchmark/v/3.0.0/2.3.1", "cis-aws-foundations-benchmark/v/3.0.0/2.3.2", "cis-aws-foundations-benchmark/v/3.0.0/2.3.3", "cis-aws-foundations-benchmark/v/3.0.0/2.4.1", "cis-aws-foundations-benchmark/v/3.0.0/2.1.4.1", "cis-aws-foundations-benchmark/v/3.0.0/2.1.4.2", "cis-aws-foundations-benchmark/v/3.0.0/2.1.1", "cis-aws-foundations-benchmark/v/3.0.0/2.1.2", "cis-aws-foundations-benchmark/v/3.0.0/3.1", "cis-aws-foundations-benchmark/v/3.0.0/3.2", "cis-aws-foundations-benchmark/v/3.0.0/3.3", "cis-aws-foundations-benchmark/v/3.0.0/3.4", "cis-aws-foundations-benchmark/v/3.0.0/3.5", "cis-aws-foundations-benchmark/v/3.0.0/3.6", "cis-aws-foundations-benchmark/v/3.0.0/3.7", "cis-aws-foundations-benchmark/v/3.0.0/3.8", "cis-aws-foundations-benchmark/v/3.0.0/3.9", "cis-aws-foundations-benchmark/v/3.0.0/5.1", "cis-aws-foundations-benchmark/v/3.0.0/5.2", "cis-aws-foundations-benchmark/v/3.0.0/5.3", "cis-aws-foundations-benchmark/v/3.0.0/5.4", "cis-aws-foundations-benchmark/v/3.0.0/5.6"]
+    }
+  }
+}
