@@ -1,0 +1,66 @@
+CIS Control ID,AWS Control ID,Control Description,Remediation,auto/manual
+1.10,IAM.5,MFA should be enabled for all IAM users that have a console password,Print a message indicating that this control cannot be repaired automatically.,Manual
+1.12,IAM.22,IAM user credentials unused for 45 days should be removed,Delete IAM credentials that have not been used for more than 45 days.,Automated
+1.14,IAM.3,IAM users' access keys should be rotated every 90 days or less,Disable IAM access key that has been used for more than 90 days.,Automated
+1.15,IAM.2,IAM users should not have IAM policies attached,Create the user group with policy of users then detach the policy of IAM user and move IAM user to user group.,Automated
+1.17,IAM.18,Ensure a support role has been created to manage incidents with AWS Support,Create an IAM role named support_role and assign the support access policy.,Automated
+1.19,IAM.26,Expired SSL/TLS certificates managed in IAM should be removed,Delete expired SSL/TLS certificates. (Can not test),Automated
+1.20,IAM.28,IAM Access Analyzer external access analyzer should be enabled,"Create an IAM Access Analyzer named ""ExternalAccessAnalyzer"".",Automated
+1.22,IAM.27,IAM identities should not have the AWSCloudShellFullAccess policy attached,"Remove the AWSCloudShellFullAccess policy from any IAM role, user and group.",Automated
+1.4,IAM.4,IAM root user access key should not exist,Print a message indicating that this control cannot be repaired automatically.,Manual
+1.5,IAM.9,MFA should be enabled for the root user,Print a message indicating that this control cannot be repaired automatically.,Manual
+1.6,IAM.6,Hardware MFA should be enabled for the root user,Print a message indicating that this control cannot be repaired automatically.,Manual
+1.8,IAM.15,Ensure IAM password policy requires minimum password length of 14 or greater,Change the minimum length of the IAM password policy to 14 or greater.,Automated
+1.9,IAM.16,Ensure IAM password policy prevents password reuse,Change the password policy to prevent users from reusing recent passwords (Our default number is 24).,Automated
+2.1.1,S3.5,S3 general purpose buckets should require requests to use SSL,Add a new policy into S3 bucket policy to deny the HTTP connect of S3 bucket.,Automated
+2.1.2,S3.20,S3 general purpose buckets should have MFA delete enabled,Print a message indicating that this control cannot be repaired automatically.,Manual
+2.1.3,,"Ensure all data in Amazon S3 has been discovered, classified and secured when required.",,Manual
+2.1.4.1,S3.1,S3 general purpose buckets should have block public access settings enabled,"Set all options in ""PublicAccessBlockConfiguration"" to true to block public access at account level.",Automated
+2.1.4.2,S3.8,S3 general purpose buckets should block public access,"Set all options in ""PublicAccessBlockConfiguration"" to true to block public access at bucket level.",Automated
+2.2.1,EC2.7,EBS default encryption should be enabled,Enable the EBS default encryption,Automated
+2.3.1,RDS.3,RDS DB instances should have encryption at-rest enabled,Make a backup of RDS DB then encrypt the backup by creating a new KMS key. Delete the previous RDS DB. Create a new RDS DB with same name by using encrypted backup.,Automated
+2.3.2,RDS.13,RDS automatic minor version upgrades should be enabled,Enable automatic minor version upgrades for RDS DB.,Automated
+2.3.3,RDS.2,"RDS DB Instances should prohibit public access, as determined by the PubliclyAccessible configuration",Change PubliclyAccessible flag,Automated
+2.4.1,EFS.1,Elastic File System should be configured to encrypt file data at-rest using AWS KMS,Create new encrypted file system (need manual data migration),Automated/Manual
+3.1,CloudTrail.1,CloudTrail should be enabled and configured with at least one multi-Region trail that includes read and write management events,Create a multi-region CloudTrail,Automated
+3.2,CloudTrail.4,CloudTrail log file validation should be enabled,Enable CloudTrail log file validation,Automated
+3.3,Config.1,AWS Config should be enabled and use the service-linked role for resource recording,Print a message indicating that this control cannot be repaired automatically.,Manual
+3.4,CloudTrail.7,Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket,"Create a new S3 bucket named ""accesslogbucket"" for log and enable access logging for CloudTrail's storage S3 buckets.",Automated
+3.5,CloudTrail.2,CloudTrail should have encryption at-rest enabled,Enable KMS encryption for CloudTrail by creating a new KMS key.,Automated
+3.6,KMS.4,AWS KMS key rotation should be enabled,Enable KMS key rotation.,Automated
+3.7,EC2.6,VPC flow logging should be enabled in all VPCs,"Create an IAM role named ""CIS-Remediations-VPC-Log-Role"" for CloudWatch then create a CloudWatch log group to store VPC flow logs.",Automated
+3.8,S3.22,S3 general purpose buckets should log object-level write events,"Create a S3 bucket to store logs and configure CloudTrail named ""cloudtrailforlogwrite"" to log object-level write operations.",Automated
+3.9,S3.23,S3 general purpose buckets should log object-level read events,"Create a S3 bucket to store logs and configure CloudTrail named ""cloudtrailforlogread"" to log object-level write operations.",Automated
+5.1,EC2.21,Network ACLs should not allow ingress from 0.0.0.0/0 to port 22 or port 3389,Remove the network ACL entry that allows all IPs (0.0.0.0/0) to access ports 22 and 3389.,Automated
+5.2,EC2.53,EC2 security groups should not allow ingress from 0.0.0.0/0 to remote server administration ports,Remove the security group rule that allows all IPs (0.0.0.0/0) to access the management port.,Automated
+5.3,EC2.54,EC2 security groups should not allow ingress from ::/0 to remote server administration ports,Remove the security group rule that allows all IPs (::/0) to access the management port.,Automated
+5.4,EC2.2,VPC default security groups should not allow inbound or outbound traffic,Create a new non-default security group and copy the rules of the default security group. Then remove all inbound and outbound traffic from the default security group.,Automated
+5.6,EC2.8,EC2 instances should use Instance Metadata Service Version 2 (IMDSv2),Enable EC2 instances to be updated to use IMDSv2.,Automated
+,,Not monitoring in Secuirty Hub,,
+1.1,Maintain current contact details ,,,
+1.2,Ensure security contact information is registered ,,,
+1.3,Ensure security questions are registered in the AWS account ,,,
+1.7,Eliminate use of the 'root' user for administrative and daily tasks ,,,
+1.11,Do not setup access keys during initial user setup for all IAM users that have a console password ,,,
+1.13,Ensure there is only one active access key available for any single IAM user,,,
+1.16,"Ensure IAM policies that allow full ""*:*"" administrative privileges are not attached",,,
+1.18,Ensure IAM instance roles are used for AWS resource access from instances,,,
+1.21,Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments,,,
+2.1.3,"Ensure all data in Amazon S3 has been discovered, classified and secured when required",,,
+4.1,Ensure unauthorized API calls are monitored ,,,
+4.2,Ensure management console sign-in without MFA is monitored ,,,
+4.3,Ensure usage of 'root' account is monitored ,,,
+4.4,Ensure IAM policy changes are monitored ,,,
+4.5,Ensure CloudTrail configuration changes are monitored ,,,
+4.6,Ensure AWS Management Console authentication failures are monitored ,,,
+4.7,Ensure disabling or scheduled deletion of customer created CMKs is monitored ,,,
+4.8,Ensure S3 bucket policy changes are monitored ,,,
+4.9,Ensure AWS Config configuration changes are monitored ,,,
+4.1,Ensure security group changes are monitored ,,,
+4.11,Ensure Network Access Control Lists (NACL) changes are monitored,,,
+4.12,Ensure changes to network gateways are monitored ,,,
+4.13,Ensure route table changes are monitored ,,,
+4.14,Ensure VPC changes are monitored ,,,
+4.15,Ensure AWS Organizations changes are monitored ,,,
+4.16,Ensure AWS Security Hub is enabled,,,
+5.5,"Ensure routing tables for VPC peering are ""least access""",,,
