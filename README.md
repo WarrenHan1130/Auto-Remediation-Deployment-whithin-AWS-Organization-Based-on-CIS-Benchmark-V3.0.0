@@ -1,4 +1,4 @@
-# Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0-
+# Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
 Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guide to securely use AWS cloud resources in large organizations through automated means.
 
 In this project on resource monitoring and non-compliant resource remediation, we will mainly use Cloud Formation, AWS Config, Security Hub, Event Bridge, and Lambda Function from AWS resources.
@@ -128,7 +128,10 @@ The implementation of this part comes mainly from an article called ["Disabling 
 # 4. Environment Setup
 This section explains how to deploy an automated remediation solution within an AWS Organization using the management account.
 
-<code style = "color:red">Note: Any platform code deployed at the organization level will not be applied to the management account. This aligns with the principle of least privilege for the management account, meaning users should avoid setting up resources or configurations directly on the management account. This approach enhances the security of the management account by reducing its exposure and ensuring it does not require security checks for managed resources.</code>
+### **🚨 Note:**
+*Any platform code deployed at the organization level will not be applied to the management account.
+This aligns with the principle of least privilege for the management account, meaning users should avoid setting up resources or configurations directly on the management account.
+This approach enhances the security of the management account by reducing its exposure and ensuring it does not require security checks for managed resources.*
 
 ## 4.1 Delegated Administrator Account Set Up - Account Level
 In this part users need to make some manual settings for the Delegated Administrator Account of Security Hub. 
@@ -152,7 +155,8 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 ![securityhub2](./ScreenShots/securityhub2.png)
 ![securityhub3](./ScreenShots/securityhub3.png)
 
-<span style = "color:red">Note: When selecting monitoring areas it is recommended to select only the desired areas. If all areas are selected, additional time may be required to complete the setup.</span>
+### **🚨 Note:**
+*When selecting monitoring areas it is recommended to select only the desired areas. If all areas are selected, additional time may be required to complete the setup.*
 
 ### 4.1.3 Set Lambda Function in the Delegated Administrator Account
 1. Search for Lambda Function in AWS and set it up in the following order
@@ -233,7 +237,8 @@ The Record selected resource types option should only be enabled when neither of
 
 ![AWS Config2](./ScreenShots/awsconfig2.png)
 
-<span style = "color:red">Note: If global resources need to be logged, users only need to enable AWS Config's global resource logging feature in one of the member accounts' regions. To fulfill this requirement users should run the template twice. The first time set up only one region and select Record Global Resources. The second time set up a region other than the previous region and do not record global resources.</span>
+### **🚨 Note:**
+*If global resources need to be logged, users only need to enable AWS Config's global resource logging feature in one of the member accounts' regions. To fulfill this requirement users should run the template twice. The first time set up only one region and select Record Global Resources. The second time set up a region other than the previous region and do not record global resources.*
 
 3. For the `Specify regions` option select regions to enable AWS Config.
 
@@ -258,7 +263,8 @@ The remediation solution provides an application called [Auto_Remediator_Role_De
 
 3. Fill the first parameter with the ARN of the IAM Role that will be used to execute the Lambda Function so that the Security Hub's Delegated Administrator Account can assume the CIS_Remediator_Role of the member account.
 
-<span style = "color:red">Note: It is recommended that users do not change the name of the role as it is used by default in the Lambda Function.</span>
+### **🚨 Note:**
+*It is recommended that users do not change the name of the role as it is used by default in the Lambda Function.*
 
 ![IAM Role1](./ScreenShots/iamrole1.png)
 
@@ -293,8 +299,9 @@ The remediation solution provides an application called [Auto_SNS_Notification_D
 
 6. Please go to the email address users set to confirm the subcription.
 
-<span style = "color:red">Note: The following deployment method is optional. The user only need to choose one way to deploy.</span>
 
+### **🚨 Note:**
+*The following deployment method is optional. The user only need to choose one way to deploy.*
 ## 4.3 AWS Service Catalog Deployment - Organization Level
 AWS Service Catalog is designed to help organizations centrally manage and deploy an approved collection of IT services. It allows administrators to create and manage catalogs to deploy AWS resources.
 
