@@ -180,7 +180,8 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 2. After finding the corresponding IAM Role follow these steps to add the policy
 `Add permissions > Create inline policy > JSON > Copy the policy below > Name the policy as CISRemediation`
 
-3. {
+3. ```json
+   {
 	"Version": "2012-10-17",
 	"Statement": [
 		{
@@ -189,8 +190,8 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 			"Action": "sts:AssumeRole",
 			"Resource": "arn:aws:iam::*:role/CIS_Remediator_Role"
 		}
-	]
-}
+   	]
+   }
 
 ![securityhub7](./ScreenShots/securityhub7.png)
 
