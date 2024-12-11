@@ -144,13 +144,13 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 ### 4.1.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub 
 1. Users need to enable Security Hub in the management account and then authorize one of the member accounts in the organization as a Delegated Administrator Account.
 
-[!securityhub1](./ScreenShots/securityhub1.png)
+![securityhub1](./ScreenShots/securityhub1.png)
 
 ### 4.1.2 Set Configuration in the Delegated Administrator Account
 1. Set up Central Configuration in the Delegated Administrator Account to enable Security Hub in all member accounts and use CIS Benchmark V3.0.0 as a benchmark.
 
-[!securityhub2](./ScreenShots/securityhub2.png)
-[!securityhub3](./ScreenShots/securityhub3.png)
+![securityhub2](./ScreenShots/securityhub2.png)
+![securityhub3](./ScreenShots/securityhub3.png)
 
 <span style = "color:red">Note: When selecting monitoring areas it is recommended to select only the desired areas. If all areas are selected, additional time may be required to complete the setup.</span>
 
@@ -160,12 +160,12 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 
 2. Upload the [CISRemediation.zip](./Lambda_Function/CISRemediation.zip) in the Lambda_Function folder that contains all the functions used to automate the fix after the functions have been created.
 
-[!securityhub4](./ScreenShots/securityhub4.png)
+![securityhub4](./ScreenShots/securityhub4.png)
 
 3. Once the code is uploaded, users need to add a Trigger to the Lambda Function and set the Event Bridge as the source so that the findings can trigger the corresponding fix function. 
 
-[!securityhub5](./ScreenShots/securityhub5.png)
-[!securityhub6](./ScreenShots/securityhub6.png)
+![securityhub5](./ScreenShots/securityhub5.png)
+![securityhub6](./ScreenShots/securityhub6.png)
 
 4. Then users need to go to Configuration > General Configuration and set the Timeout as 30 sec. Otherwise some Lambda Functions can not execute in time.
 
@@ -187,7 +187,7 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 	]
 }
 
-[!securityhub7](./ScreenShots/securityhub7.png)
+![securityhub7](./ScreenShots/securityhub7.png)
 
 ### 4.1.5 Set the Event Bridge in the Delegated Administrator Account
 1. Search for Event Bridge in AWS and set it up.
@@ -200,8 +200,8 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 
 5. Set the target to the Lambda Function user created in previous.
 
-[!securityhub8](./ScreenShots/securityhub8.png)
-[!securityhub9](./ScreenShots/securityhub9.png)
+![securityhub8](./ScreenShots/securityhub8.png)
+![securityhub9](./ScreenShots/securityhub9.png)
 
 ## 4.2 CloudFormation Stacksets Deployment - Organization Level
 In this part, we will introduce three CloudFormation templates for deploying AWS resources at the organizational level.
