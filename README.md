@@ -1,3 +1,4 @@
+
 # 🌐 Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
 
 Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guide to securely use AWS cloud resources in large organizations through automated means.
@@ -38,10 +39,23 @@ In this project on resource monitoring and non-compliant resource remediation, w
     	- [4.3.2 Member Account Set Up](#432-member-account-set-up)
 		- [4.3.3 Summary](#433-summary)
     - [4.4 Optional Requirement](#44-optional-requirement)
+- 🚑 [Remediation](#-5-Remediation)
+	- [5.1 Lambda functions](#51-lambda-functions)
+	- [5.2 CIS control remediations](#52-cis-control-remediations)
+		- [5.2.1 CIS Controls not supported by Security Hub](#521-cis-controls-not-supported-by-security-hub)
+		- [5.2.2 CIS Controls need manual remediations](#522-cis-controls-need-manual-remediations)
+		- [5.2.3 CIS Controls support automatic remediation](#523-cis-controls-support-automatic-remediation)
+			- [5.2.3.1 IAM controls](#5231-iam-controls)
+			- [5.2.3.2 Storage controls](#5232-storage-controls)
+			- [5.2.3.3 Logging controls](#5233-logging-controls)
+			- [5.2.3.4 Networking controls](#5234-networking-controls)
+- 🧩 [Remediation examples](#-6-remediation-example)
+	- [6.1 Automatic remediation](#61-automatic-remediation)
+- 🔚 [Conclusion](#-7-Conclusion)
 
 </details>
 
-# 📘 1. Introduction
+# 📘 1 Introduction
 
 ## 1.1 Background
 With the rapid popularization of cloud computing, cloud resources have become the core platform for enterprises and individuals to store, process, and manage data. With cloud resources, enterprises can obtain high-performance computing power at a lower cost and easily achieve global service coverage with its high flexibility.
@@ -63,7 +77,7 @@ The CIS AWS Foundations Benchmark is a security configuration benchmark designed
 
 ## 1.3 CISv3.0.0 Recommended Controls
 
-# 💡 2. Framework Design
+# 💡 2 Framework Design
 The framework shown in the figure reflects the overall design concept of the project. The implementation of the entire framework will be divided into four parts:
 
 Part 1. Non-compliant Resource Detection
@@ -113,7 +127,7 @@ This optional part will allow users to manually enable or disable a particular d
 
 The implementation of this part comes mainly from an article called ["Disabling Security Hub controls in a multi-account environment"](https://aws.amazon.com/blogs/security/disabling-security-hub-controls-in-a-multi-account-environment/). See the corresponding [GitHub](https://github.com/aws-samples/aws-security-hub-cross-account-controls-disabler) for details.
 
-# ⚙️ 3. Required AWS Serivce
+# ⚙️ 3 Required AWS Serivce
 1. [AWS Config](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html): A service that continuously monitors and evaluates the configuration of AWS resources against predefined or custom compliance rules.
 
 2. [AWS Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html): A centralized service that provides comprehensive security visibility, consolidating findings from multiple AWS services and third-party tools.
@@ -126,7 +140,7 @@ The implementation of this part comes mainly from an article called ["Disabling 
 
 6. [AWS CloudFormation](https://docs.aws.amazon.com/cloudformation/): A service that simplifies infrastructure management by allowing users to define, provision, and manage AWS resources using declarative code templates, ensuring consistent and repeatable deployments.
 
-# 🛠️ 4. Environment Setup
+# 🛠️ 4 Environment Setup
 This section explains how to deploy an automated remediation solution within an AWS Organization using the management account.
 
 ### **🚨 Note:**
@@ -377,3 +391,203 @@ Therefore, this part is only an innovation of the project and is not mandatory f
 
 # 4.4 Optional Requirement
 For the creation of optional requirements follow the steps in [GitHub](https://github.com/aws-samples/aws-security-hub-cross-account-controls-disabler).
+
+# 🚑 5 Remediation
+
+Based on Chapter 4 of this report, the evironment configuration of our AWS organization has been completed. AWS Config will monitor all resources within the organizaion according to the rules defined in the CIS Benchmark. [screenshot of detection frequency setting?] If any non-compliant configurations or potential vulnerabilities are defined, AWS Security Hub will aggregates all security findings. AWS EventBridge will then trigger events, and Lambda funcitons will act based on the rules set in EventBridge, either notifying users via emails or performing automatic remediations. 
+
+## 5.1 Lambda functions
+
+After being triggered by an EventBridge event, the Lambda function will invoke the appropriate remediation functions based on the attributes of the event. The specific mechanism in [link of lambda_function.py] is as follows:
+
+1. Assume a CIS Remediator role, and create a target session using temporary credentials retrieved from the assumed role.
+2. Use the SecurityControlId field in the EventBridge event to determine the ID of security issue and match it to the corresponding CIS control.
+3. Invoke appropriate remediation functions in the [link of CISRemediation.py] to remediate the issues.
+4. Once the remediation is complete, use SNS resources specific for CIS remediation to notify users via email about the results of the remediation or any further actions required.
+
+## 5.2 CIS control remediations
+
+The functions in CISRemediation.py form the key component of the automatic remediation process.
+
+This project is built based on the CIS AWS Foundations Benchmark v3.0.0, which comprises a total of 63 controls. These controls are categorized as follows:
+
+1. 27 controls are not supported by AWS Security Hub and are therefore excluded from our automatic remediation functions.
+2. 6 controls are supported by Security Hub but do not require manual remediation by users.
+3. 30 controls are supported by Security Hub and can be automatically remediated through Lambda functions.
+
+List of CIS controls supported by AWS Security Hub and comparison of each CIS AWS Foundations Benchmark version:
+[CIS AWS Foundations Benchmark](https://docs.aws.amazon.com/securityhub/latest/userguide/cis-aws-foundations-benchmark.html)
+
+### 5.2.1 CIS Controls not supported by Security Hub 
+
+The following are CIS controls that cannot be automatically detected by AWS Security Hub. These controls are not within the scope of our Lambda functions:
+
+| CIS control ID | Control Description | 
+|------------------|------------------|
+| 1.1    | Maintain current contact details     | 
+| 1.2    | Ensure security contact information is registered     |
+| 1.3    | Ensure security questions are registered in the AWS account    | 
+| 1.7    | Eliminate use of the 'root' user for administrative and daily tasks    | 
+| 1.11    | Do not setup access keys during initial user setup for all IAM users that have a console password    | 
+| 1.13    | Ensure there is only one active access key available for any single IAM user   | 
+| 1.16    | Ensure IAM policies that allow full "*:*" administrative privileges are not attached   | 
+| 1.18    | Ensure IAM instance roles are used for AWS resource access from instances   | 
+| 1.21    | Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments   | 
+| 2.1.3    | Ensure all data in Amazon S3 has been discovered, classified and secured when required   | 
+| 4.1    | Ensure unauthorized API calls are monitored 				   | 
+| 4.2    | Ensure management console sign-in without MFA is monitored 				   | 
+| 4.3    | Ensure usage of 'root' account is monitored 				   | 
+| 4.4    | Ensure IAM policy changes are monitored 				   | 
+| 4.5    | Ensure CloudTrail configuration changes are monitored 				   | 
+| 4.6    | Ensure AWS Management Console authentication failures are monitored 				   | 
+| 4.7    | Ensure disabling or scheduled deletion of customer created CMKs is monitored 				   | 
+| 4.8    | Ensure S3 bucket policy changes are monitored 				   | 
+| 4.9    | Ensure AWS Config configuration changes are monitored 				   | 
+| 4.10    | Ensure security group changes are monitored 				   | 
+| 4.11    | Ensure Network Access Control Lists (NACL) changes are monitored				   | 
+| 4.12    | Ensure changes to network gateways are monitored 				   | 
+| 4.13    | Ensure route table changes are monitored 				   | 
+| 4.14    | Ensure VPC changes are monitored 				   | 
+| 4.15    | Ensure AWS Organizations changes are monitored 				   | 
+| 4.16    | Ensure AWS Security Hub is enabled				   | 
+| 5.5    | Ensure routing tables for VPC peering are "least access"   | 
+
+
+### 5.2.2 CIS Controls need manual remediations
+
+The following controls can be detected by AWS Security Hub but require manual actions from users to complete the remediation process. In case of these controls, our functions are configured to send email notifications, keeping users informed of the findings:
+
+| CIS control ID |AWS Control ID |  Control Description |  Actions Required from Users | 
+|------------------|------------------|------------------|------------------|
+|1.4|IAM.4|[IAM root user access key should not exist](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-4)|Delete the root user access key|
+|1.5|IAM.9|[MFA should be enabled for the root user](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-9)|Enable MFA for the root user|
+|1.6|IAM.6|[Hardware MFA should be enabled for the root user](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-6)|Add a hardware MFA device for the root user|
+|1.10|IAM.5|[MFA should be enabled for all IAM users that have a console password](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-5)|Add MFA for IAM users|
+|2.1.2|S3.20|[S3 general purpose buckets should have MFA delete enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-20)|Enable S3 MFA delete on a bucket|
+|3.3|Config.1|[AWS Config should be enabled and use the service-linked role for resource recording](https://docs.aws.amazon.com/securityhub/latest/userguide/config-controls.html#config-1)|Enable AWS Config and record all required resources|
+
+>Links to the AWS documentation have been provided, where you can find more detailed information about the controls.
+
+### 5.2.3 CIS Controls support automatic remediation
+
+The following controls are fully supported by AWS Security Hub and can be automatically remediated after lambda functions are triggered by EventBridge rules. 
+
+#### 5.2.3.1 IAM controls
+
+| CIS control ID |AWS Control ID |  Control Description |  Remediation Actions | 
+|------------------|------------------|------------------|------------------|
+|1.8|IAM.15|[Ensure IAM password policy requires minimum password length of 14 or greater](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-15)|Change the minimum length of the IAM password policy to 14 or greater.|
+|1.9|IAM.16|[Ensure IAM password policy prevents password reuse](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-16)|Change the password policy to prevent users from reusing recent passwords.|
+|1.12|IAM.22|[IAM user credentials unused for 45 days should be removed](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-22)|Delete IAM credentials that have not been used for more than 45 days.|
+|1.14|IAM.3|[IAM users' access keys should be rotated every 90 days or less](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-3)|Disable IAM access key that has been used for more than 90 days.|
+|1.15|IAM.2|[IAM users should not have IAM policies attached](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-2)|Create the user group with policy of users then detach the policy of IAM user and move IAM user to user group.|
+|1.17|IAM.18|[Ensure a support role has been created to manage incidents with AWS Support](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-18)|Create an IAM role named support_role and assign the support access policy.|
+|1.19|IAM.26|[Expired SSL/TLS certificates managed in IAM should be removed](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-26)|Delete expired SSL/TLS certificates. |
+|1.20|IAM.28|[IAM Access Analyzer external access analyzer should be enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-28)|Create an IAM Access Analyzer named "ExternalAccessAnalyzer".|
+|1.22|IAM.27|[IAM identities should not have the AWSCloudShellFullAccess policy attached](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-27)|Remove the AWSCloudShellFullAccess policy from any IAM role, user and group.|
+
+>Links to the AWS documentation have been provided, where you can find more detailed information about the controls.  
+
+>CIS 1.9: "Number of passwords to remember" is set to 24.  
+
+>CIS 1.19: [REASON FOR "CANNOT TEST"].
+
+#### 5.2.3.2 Storage controls
+
+| CIS control ID |AWS Control ID |  Control Description |  Remediation Actions | 
+|------------------|------------------|------------------|------------------|
+|2.1.1|S3.5|[S3 general purpose buckets should require requests to use SSL](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-5)|Add a new policy into S3 bucket policy to deny the HTTP connect of S3 bucket.|
+|2.1.4.1|S3.1|[S3 general purpose buckets should have block public access settings enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-1)|Set all options in "PublicAccessBlockConfiguration" to true to block public access at account level.|
+|2.1.4.2|S3.8|[S3 general purpose buckets should block public access](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-8)|Set all options in "PublicAccessBlockConfiguration" to true to block public access at bucket level.|
+|2.2.1|EC2.7|[EBS default encryption should be enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-7)|Enable the EBS default encryption.|
+|2.3.1|RDS.3|[RDS DB instances should have encryption at-rest enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/rds-controls.html#rds-3)|Make a backup of RDS DB then encrypt the backup by creating a new KMS key. Delete the previous RDS DB. Create a new RDS DB with same name by using encrypted backup.|
+|2.3.2|RDS.13|[RDS automatic minor version upgrades should be enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/rds-controls.html#rds-13)|Enable automatic minor version upgrades for RDS DB.|
+|2.3.3|RDS.2|[RDS DB Instances should prohibit public access, as determined by the PubliclyAccessible configuration](https://docs.aws.amazon.com/securityhub/latest/userguide/rds-controls.html#rds-2)|Change PubliclyAccessible flag.|
+|2.4.1|EFS.1|[Elastic File System should be configured to encrypt file data at-rest using AWS KMS](https://docs.aws.amazon.com/securityhub/latest/userguide/efs-controls.html#efs-1)|Create new encrypted file system (need manual data migration)|
+
+>Links to the AWS documentation have been provided, where you can find more detailed information about the controls.  
+
+#### 5.2.3.3 Logging controls
+
+| CIS control ID |AWS Control ID |  Control Description |  Remediation Actions | 
+|------------------|------------------|------------------|------------------|
+|3.1|CloudTrail.1|[CloudTrail should be enabled and configured with at least one multi-Region trail that includes read and write management events](https://docs.aws.amazon.com/securityhub/latest/userguide/cloudtrail-controls.html#cloudtrail-1)|Create a multi-region CloudTrail.|
+|3.2|CloudTrail.4|[CloudTrail log file validation should be enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/cloudtrail-controls.html#cloudtrail-4)|Enable CloudTrail log file validation|
+|3.4|CloudTrail.7|[Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket](https://docs.aws.amazon.com/securityhub/latest/userguide/cloudtrail-controls.html#cloudtrail-7)|Create a new S3 bucket named "accesslogbucket" for log and enable access logging for CloudTrail's storage S3 buckets.|
+|3.5|CloudTrail.2|[CloudTrail should have encryption at-rest enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/cloudtrail-controls.html#cloudtrail-2)|Enable KMS encryption for CloudTrail by creating a new KMS key.|
+|3.6|KMS.4|[AWS KMS key rotation should be enabled](https://docs.aws.amazon.com/securityhub/latest/userguide/kms-controls.html#kms-4)|Enable KMS key rotation.|
+|3.7|EC2.6|[VPC flow logging should be enabled in all VPCs](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-6)|Create an IAM role named "CIS-Remediations-VPC-Log-Role" for CloudWatch then create a CloudWatch log group to store VPC flow logs.|
+|3.8|S3.22|[S3 general purpose buckets should log object-level write events](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-22)|Create a S3 bucket to store logs and configure CloudTrail named "cloudtrailforlogwrite" to log object-level write operations.|
+|3.9|S3.23|[S3 general purpose buckets should log object-level read events](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html#s3-23)|Create a S3 bucket to store logs and configure CloudTrail named "cloudtrailforlogread" to log object-level write operations.|
+
+>Links to the AWS documentation have been provided, where you can find more detailed information about the controls.  
+
+#### 5.2.3.4 Networking controls
+
+| CIS control ID |AWS Control ID |  Control Description |  Remediation Actions | 
+|------------------|------------------|------------------|------------------|
+|5.1|EC2.21|[Network ACLs should not allow ingress from 0.0.0.0/0 to port 22 or port 3389](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-21)|Remove the network ACL entry that allows all IPs (0.0.0.0/0) to access ports 22 and 3389.|
+|5.2|EC2.53|[EC2 security groups should not allow ingress from 0.0.0.0/0 to remote server administration ports](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-53)|Remove the security group rule that allows all IPs (0.0.0.0/0) to access the management port.|
+|5.3|EC2.54|[EC2 security groups should not allow ingress from ::/0 to remote server administration ports](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-54)|Remove the security group rule that allows all IPs (::/0) to access the management port.|
+|5.4|EC2.2|[VPC default security groups should not allow inbound or outbound traffic](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-2)|Create a new non-default security group and copy the rules of the default security group. Then remove all inbound and outbound traffic from the default security group.|
+|5.6|EC2.8|[EC2 instances should use Instance Metadata Service Version 2 (IMDSv2)](https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-8)|Enable EC2 instances to be updated to use IMDSv2.|
+
+>Links to the AWS documentation have been provided, where you can find more detailed information about the controls. 
+
+# 🧩 6 Remediation example
+
+## 6.1 Automatic remediation
+
+>Take CIS 2.3.1 RDS DB instances should have encryption at-rest enabled as an example. 
+
+	AWS Config rule: Checks if Amazon Relational Database Service (Amazon RDS) DB snapshots are encrypted. The rule is NON_COMPLIANT if the Amazon RDS DB snapshots are not encrypted.
+	Remediation: Make a backup of RDS DB then encrypt the backup by creating a new KMS key. Delete the previous RDS DB. Create a new RDS DB with same name by using encrypted backup.
+
+### a) AWS Config and Security Hub
+
+Database with non-compliant rules (Encrytion is set to 'Not enabled'):  
+![database_original](./ScreenShots/database_original.png)
+
+AWS Config:
+![AWS_Config](./ScreenShots/aws_config.png)
+
+Security Hub:  
+![Security_hub](./ScreenShots/security_hub.png)
+
+
+### b) Lambda Functions triggered
+
+The Lambda functions were triggered, initiating the remediation process.
+![CloudWatch_Log](./ScreenShots/cloudwatch_log.png)
+
+### c) Remediation result
+
+As shown in the CloudWatch Logs:
+
+1. A snapshot was created for the non-compliant database database-1, and the original unencrypted database was deleted.
+![snapshot](./ScreenShots/snapshots.png)
+2. A new encrypted database database-1 was created using the snapshot of the original database. The new database is encrypted with a newly generated KMS key.
+![KMS](./ScreenShots/KMS.png)
+3. An email notification was sent to the user.
+![Email](./ScreenShots/email_notification.png)
+
+
+# 🔚 7 Conclusion
+
+In this project, we exploited key AWS services, including CloudFormation, AWS Config, Security Hub, EventBridge and Lambda Functions, to build a robust solution for monitoring and remediation. This integration ensures security compliance across multiple accounts within an AWS organization. 
+
+## key Highlights
+
+	- Deployment: [key points like one-click deployment across accounts]
+	- Real-time Resource Monitoring: AWS Config monitors recource configurations and compliance with CIS benchmarks.  
+	- Automatic Remediation: Event-driven automation using Lambda Functions enables fast and consistent remedaition of non-compliant resources, reducing labor cost and human error.   
+	- [new?]
+
+## Disclaimer
+
+## Acknowledgements
+
+Team
+Mentor
+Professor
+Prasanna
