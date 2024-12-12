@@ -1,4 +1,5 @@
 
+
 # 🌐 Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
 
 Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guide to securely use AWS cloud resources in large organizations through automated means.
@@ -29,7 +30,8 @@ In this project on resource monitoring and non-compliant resource remediation, w
     	- [4.1.2 Set Configuration in the Delegated Administrator Account](#412-set-configuration-in-the-delegated-administrator-account)
     	- [4.1.3 Set Lambda Function in the Delegated Administrator Account](#413-set-lambda-function-in-the-delegated-administrator-account)
     	- [4.1.4 Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account](#414-modify-lambda-function-iam-role-permissions-in-the-delegated-administrator-account)
-		- [4.1.5 Set the Event Bridge in the Delegated Administrator Account](#415-set-the-event-bridge-in-the-delegated-administrator-account)
+		- [4.1.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation](#415-set-the-event-bridge-in-the-delegated-administrator-account-for-auto-remediation)
+		- [4.1.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action](#416-set-the-event-bridge-in-the-delegated-administrator-account-for-custom-action)
     - [4.2 CloudFormation Stacksets Deployment - Organization Level](#42-cloudformation-stacksets-deployment---organization-level)
 		- [4.2.1 AWS Config Deployment](#421-aws-config-deployment)
     	- [4.2.2 Remediation Role Deployment](#422-remediation-role-deployment)
@@ -211,8 +213,8 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 
 ![securityhub7](./ScreenShots/securityhub7.png)
 
-### 4.1.5 Set the Event Bridge in the Delegated Administrator Account
-1. Search for Event Bridge in AWS and set it up.
+### 4.1.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation
+1. Search for Event Bridge in AWS and choose `Create rule`.
 
 2. In the `Build event pattern` set the `Event source` to `Other`.
 
@@ -220,10 +222,35 @@ Part 5. Set the Event Bridge in the Delegated Administrator Account
 
 4. Copy the rule in [Event_Trigger.jason] in Event_Bridge_Trigger folder into the `Event pattern`.
 
-5. Set the target to the Lambda Function user created in previous.
+5. Set the target to the Lambda Function which user created in previous.
 
 ![securityhub8](./ScreenShots/securityhub8.png)
 ![securityhub9](./ScreenShots/securityhub9.png)
+
+### 4.1.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action
+1. Search for Security Hub and set it up.
+
+2. In the `Custom actions` choose to `Create custom action` and copy the `Custom action ARN`.
+
+![customaction0](./ScreenShots/customaction0.png)
+![customaction3](./ScreenShots/customaction3.png)
+
+3. Search for Event Bridge in AWS and set it up.
+
+4. In the `Build event pattern` set the `Event source` to `AWS events or EventBridge partner events`.
+
+5. In the `Creation method` set it to `Use pattern form`.
+
+6. Set the `AWS service` to `Security Hub`.
+
+7. Set the `Event type` to `Security Hub Findings - Custom Action`
+
+8. Choose `Specific custom action ARN(s)` and paste the copied ARN.
+
+9. Set the target to the Lambda Function which user created in previous.
+
+![customaction1](./ScreenShots/customaction1.png)
+![customaction2](./ScreenShots/customaction2.png)
 
 ## 4.2 CloudFormation Stacksets Deployment - Organization Level
 In this part, we will introduce three CloudFormation templates for deploying AWS resources at the organizational level.
