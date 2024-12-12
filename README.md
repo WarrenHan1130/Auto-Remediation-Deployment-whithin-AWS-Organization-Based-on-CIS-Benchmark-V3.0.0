@@ -127,6 +127,8 @@ This optional part will allow users to manually enable or disable a particular d
 
 The implementation of this part comes mainly from an article called ["Disabling Security Hub controls in a multi-account environment"](https://aws.amazon.com/blogs/security/disabling-security-hub-controls-in-a-multi-account-environment/). See the corresponding [GitHub](https://github.com/aws-samples/aws-security-hub-cross-account-controls-disabler) for details.
 
+![Fourth Part](./ScreenShots/part4.png)
+
 # ⚙️ 3 Required AWS Serivce
 1. [AWS Config](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html): A service that continuously monitors and evaluates the configuration of AWS resources against predefined or custom compliance rules.
 
