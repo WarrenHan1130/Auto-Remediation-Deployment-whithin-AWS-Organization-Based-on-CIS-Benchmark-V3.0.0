@@ -15,9 +15,9 @@ In this project on resource monitoring and non-compliant resource remediation, w
 ## Contents
 
 - 📘 [Introduction](#-1-introduction)
-    - [1.1 Background](#11-Background)
-    - [1.2 CIS Benchmark and CIS AWS Foundations Benchmark](#12-CIS-Benchmark-and-CIS-AWS-Foundations-Benchmark)
-    - [1.3 CISv3.0.0 Recommended Controls](#13-CISv300-Recommended-Controls)
+    - [1.1 Background](#1.1-Background)
+    - [1.2 CIS Benchmark and CIS AWS Foundations Benchmark](#1.2-CIS-Benchmark-and-CIS-AWS-Foundations-Benchmark)
+    - [1.3 CISv3.0.0 Recommended Controls](#1.3-CISv300-Recommended-Controls)
 - 💡 [Framework Design](#-2-framework-design)
     - [2.1 Non-compliant Resource Detection](#21-non-compliant-resource-detection)
     - [2.2 Integration of Detection Results](#22-integration-of-detection-results)
@@ -423,20 +423,20 @@ For the creation of optional requirements follow the steps in [GitHub](https://g
 
 # 🚑 5 Remediation
 
-Based on Chapter 4 of this report, the evironment configuration of our AWS organization has been completed. AWS Config will monitor all resources within the organizaion according to the rules defined in the CIS Benchmark. [screenshot of detection frequency setting?] If any non-compliant configurations or potential vulnerabilities are defined, AWS Security Hub will aggregates all security findings. AWS EventBridge will then trigger events, and Lambda funcitons will act based on the rules set in EventBridge, either notifying users via emails or performing automatic remediations. 
+Based on Chapter 4 of this report, the environment configuration of our AWS organization is complete. AWS Config will monitor all resources within the organizaion according to the rules defined in the CIS Benchmark. If any non-compliant configurations or potential vulnerabilities are defined, AWS Security Hub will aggregate all security findings. AWS EventBridge will then trigger events, and Lambda functions will act based on the rules set in EventBridge, either notifying users via email or performing automated remediation. 
 
 ## 5.1 Lambda functions
 
-After being triggered by an EventBridge event, the Lambda function will invoke the appropriate remediation functions based on the attributes of the event. The specific mechanism in [link of lambda_function.py] is as follows:
+After being triggered by an EventBridge event, the Lambda Function will invoke the appropriate remediation functions based on the attributes of the event. The specific mechanism in [lambda_function.py](./Lambda_Function/lambda_function.py) is as follows:
 
 1. Assume a CIS Remediator role, and create a target session using temporary credentials retrieved from the assumed role.
 2. Use the SecurityControlId field in the EventBridge event to determine the ID of security issue and match it to the corresponding CIS control.
-3. Invoke appropriate remediation functions in the [link of CISRemediation.py] to remediate the issues.
+3. Invoke appropriate remediation functions in the [CISRemediation.py](./Lambda_Function/CISRemediation.py) to remediate the issues.
 4. Once the remediation is complete, use SNS resources specific for CIS remediation to notify users via email about the results of the remediation or any further actions required.
 
 ## 5.2 CIS control remediations
 
-The functions in CISRemediation.py form the key component of the automatic remediation process.
+The functions in CISRemediation.py form the key component of the automated remediation process.
 
 This project is built based on the CIS AWS Foundations Benchmark v3.0.0, which comprises a total of 63 controls. These controls are categorized as follows:
 
@@ -570,7 +570,7 @@ The following controls are fully supported by AWS Security Hub and can be automa
 >Take CIS 2.3.1 RDS DB instances should have encryption at-rest enabled as an example. 
 
 	AWS Config rule: Checks if Amazon Relational Database Service (Amazon RDS) DB snapshots are encrypted. The rule is NON_COMPLIANT if the Amazon RDS DB snapshots are not encrypted.
-	Remediation: Make a backup of RDS DB then encrypt the backup by creating a new KMS key. Delete the previous RDS DB. Create a new RDS DB with same name by using encrypted backup.
+	Remediation: Make a backup of RDS DB then encrypt the backup by creating a new KMS key. Delete the previous RDS DB. Create a new RDS DB with the same name by using the encrypted backup.
 
 ### a) AWS Config and Security Hub
 
@@ -607,16 +607,27 @@ In this project, we exploited key AWS services, including CloudFormation, AWS Co
 
 ## key Highlights
 
-	- Deployment: [key points like one-click deployment across accounts]
+	- Deployment: Use CloudFormation for deploying AWS resources at the organizational level.
 	- Real-time Resource Monitoring: AWS Config monitors recource configurations and compliance with CIS benchmarks.  
 	- Automatic Remediation: Event-driven automation using Lambda Functions enables fast and consistent remedaition of non-compliant resources, reducing labor cost and human error.   
-	- [new?]
+	- Deployment using Service Catalog：​Use AWS Service Catalog to package the template code, which  supports version release management, privilege access, and cost management.
 
 ## Disclaimer
 
+All functions included in this project have been thoroughly tested, except for the following two:
+- CIS 1.19: The remediation function for this control is not tested because all AWS regions currently support ACM. Since IAM is typically used for managing SSL/TLS certificates only in regions where ACM is unavailable, there are no test scenarios in our test AWS organization.
+- CIS 3.3: In our test environments, AWS Config is already enabled across all regions and the remediation function cannot be triggered without the AWS Congfig based on our existing deployment.
+
+Before implementing this solution in your environment, please ensure that you thoroughly review the entire documentation and follow the deployment steps as outlined. Use this project at your own discretion and risk.
+
 ## Acknowledgements
 
-Team
-Mentor
-Professor
-Prasanna
+I would like to express our gratitude to our mentor and the other contributor of this project for their valuable insights, support and encouragement throughout this project, as well as to our TA for his guidance.
+
+- Mentor:
+	- [Mohammad Reza Bagheri](https://github.com/BagheriReza)	 
+- Other Contributor:
+	- [Yarui Qiu](https://github.com/LottieQ)
+- TA:
+	- [Prasanna Aravindan](https://github.com/prasanna7401)
+
