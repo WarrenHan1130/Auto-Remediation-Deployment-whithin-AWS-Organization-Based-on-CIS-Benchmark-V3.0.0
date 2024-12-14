@@ -15,9 +15,9 @@ In this project on resource monitoring and non-compliant resource remediation, w
 ## Contents
 
 - 📘 [Introduction](#-1-introduction)
-    - [1.1 Background](#1.1-Background)
-    - [1.2 CIS Benchmark and CIS AWS Foundations Benchmark](#1.2-CIS-Benchmark-and-CIS-AWS-Foundations-Benchmark)
-    - [1.3 CISv3.0.0 Recommended Controls](#1.3-CISv300-Recommended-Controls)
+    - [1.1 Background](#11-Background)
+    - [1.2 CIS Benchmark and CIS AWS Foundations Benchmark](#12-CIS-Benchmark-and-CIS-AWS-Foundations-Benchmark)
+    - [1.3 CISv3.0.0 Recommended Controls](#13-CISv300-Recommended-Controls)
 - 💡 [Framework Design](#-2-framework-design)
     - [2.1 Non-compliant Resource Detection](#21-non-compliant-resource-detection)
     - [2.2 Integration of Detection Results](#22-integration-of-detection-results)
