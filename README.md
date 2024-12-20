@@ -1,5 +1,3 @@
-
-
 # 🌐 Auto-Remediation-in-AWS-Organization-Based-on-CIS-Benchmark-V3.0.0
 
 Therefore, the core of this project is how to use CIS Benchmark V3.0.0 as a guide to securely use AWS cloud resources in large organizations through automated means.
@@ -25,17 +23,17 @@ In this project on resource monitoring and non-compliant resource remediation, w
     - [2.4 (Optional) Adjustment of Detection Rules](#24-optional-adjustment-of-detection-rules)
 - ⚙️ [Required AWS Serivce](#️-3-required-aws-serivce)
 - 🛠️ [Environment Setup](#️-4-environment-setup)
-	- [4.1 Delegated Administrator Account Set Up - Account Level](#41-delegated-administrator-account-set-up---account-level)
-		- [4.1.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub](#411-set-the-member-account-to-be-the-delegated-administrator-account-for-the-security-hub)
-    	- [4.1.2 Set Configuration in the Delegated Administrator Account](#412-set-configuration-in-the-delegated-administrator-account)
-    	- [4.1.3 Set Lambda Function in the Delegated Administrator Account](#413-set-lambda-function-in-the-delegated-administrator-account)
-    	- [4.1.4 Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account](#414-modify-lambda-function-iam-role-permissions-in-the-delegated-administrator-account)
-		- [4.1.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation](#415-set-the-event-bridge-in-the-delegated-administrator-account-for-auto-remediation)
-		- [4.1.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action](#416-set-the-event-bridge-in-the-delegated-administrator-account-for-custom-action)
-    - [4.2 CloudFormation Stacksets Deployment - Organization Level](#42-cloudformation-stacksets-deployment---organization-level)
-		- [4.2.1 AWS Config Deployment](#421-aws-config-deployment)
-    	- [4.2.2 Remediation Role Deployment](#422-remediation-role-deployment)
-    	- [4.2.3 SNS Notification Deployment](#423-sns-notification-deployment)
+    - [4.1 CloudFormation Stacksets Deployment - Organization Level](#41-cloudformation-stacksets-deployment---organization-level)
+		- [4.1.1 AWS Config Deployment](#411-aws-config-deployment)
+    	- [4.1.2 Remediation Role Deployment](#412-remediation-role-deployment)
+    	- [4.1.3 SNS Notification Deployment](#413-sns-notification-deployment)
+    - [4.2 Delegated Administrator Account Set Up - Account Level](#42-delegated-administrator-account-set-up---account-level)
+		- [4.2.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub](#421-set-the-member-account-to-be-the-delegated-administrator-account-for-the-security-hub)
+    	- [4.2.2 Set Configuration in the Delegated Administrator Account](#422-set-configuration-in-the-delegated-administrator-account)
+    	- [4.2.3 Set Lambda Function in the Delegated Administrator Account](#423-set-lambda-function-in-the-delegated-administrator-account)
+    	- [4.2.4 Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account](#424-modify-lambda-function-iam-role-permissions-in-the-delegated-administrator-account)
+		- [4.2.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation](#425-set-the-event-bridge-in-the-delegated-administrator-account-for-auto-remediation)
+		- [4.2.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action](#426-set-the-event-bridge-in-the-delegated-administrator-account-for-custom-action)
 	- [4.3 AWS Service Catalog Deployment - Organization Level](#43-aws-service-catalog-deployment---organization-level)
 		- [4.3.1 Management Account Set Up](#431-management-account-set-up)
     	- [4.3.2 Member Account Set Up](#432-member-account-set-up)
@@ -152,107 +150,7 @@ This section explains how to deploy an automated remediation solution within an 
 This aligns with the principle of least privilege for the management account, meaning users should avoid setting up resources or configurations directly on the management account.
 This approach enhances the security of the management account by reducing its exposure and ensuring it does not require security checks for managed resources.*
 
-## 4.1 Delegated Administrator Account Set Up - Account Level
-In this part users need to make some manual settings for the Delegated Administrator Account of Security Hub. 
-
-The reason for not automating this part of the setup is that users only need to make a few settings for one account.
-
-Part 1. Set the Member Account to be the Delegated Administrator Account for the Security Hub 
-Part 2. Set Configuration in the Delegated Administrator Account
-Part 3. Set Lambda Function in the Delegated Administrator Account
-Part 4. Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account
-Part 5. Set the Event Bridge in the Delegated Administrator Account
-
-### 4.1.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub 
-1. Users need to enable Security Hub in the management account and then authorize one of the member accounts in the organization as a Delegated Administrator Account.
-
-![securityhub1](./ScreenShots/securityhub1.png)
-
-### 4.1.2 Set Configuration in the Delegated Administrator Account
-1. Set up Central Configuration in the Delegated Administrator Account to enable Security Hub in all member accounts and use CIS Benchmark V3.0.0 as a benchmark.
-
-![securityhub2](./ScreenShots/securityhub2.png)
-![securityhub3](./ScreenShots/securityhub3.png)
-
-### **🚨 Note:**
-*When selecting monitoring areas it is recommended to select only the desired areas. If all areas are selected, additional time may be required to complete the setup.*
-
-### 4.1.3 Set Lambda Function in the Delegated Administrator Account
-1. Search for Lambda Function in AWS and set it up in the following order
-`Create Function > Function name > Self-defined name > Runtime > python 3.8`
-
-2. Upload the [CISRemediation.zip](./Lambda_Function/CISRemediation.zip) in the Lambda_Function folder that contains all the functions used to automate the fix after the functions have been created.
-
-![securityhub4](./ScreenShots/securityhub4.png)
-
-3. Once the code is uploaded, users need to add a Trigger to the Lambda Function and set the Event Bridge as the source so that the findings can trigger the corresponding fix function. 
-
-![securityhub5](./ScreenShots/securityhub5.png)
-![securityhub6](./ScreenShots/securityhub6.png)
-
-4. Then users need to go to Configuration > General Configuration and set the Timeout as 30 sec. Otherwise some Lambda Functions can not execute in time.
-
-### 4.1.4 Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account
-1. After successfully setting up the Lambda Function it automatically creates an IAM Role in the Delegated Administrator Account. Users will need to find this role and set up a separate permission for it in order to assume the Remediation Role in the other member accounts.
-
-2. After finding the corresponding IAM Role follow these steps to add the policy
-`Add permissions > Create inline policy > JSON > Copy the policy below > Name the policy as CISRemediation`
-
-3. ```json
-   {
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Sid": "CrossAccountRemediatorRoleAssumption",
-			"Effect": "Allow",
-			"Action": "sts:AssumeRole",
-			"Resource": "arn:aws:iam::*:role/CIS_Remediator_Role"
-		}
-   	]
-   }
-
-![securityhub7](./ScreenShots/securityhub7.png)
-
-### 4.1.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation
-1. Search for Event Bridge in AWS and choose `Create rule`.
-
-2. In the `Build event pattern` set the `Event source` to `Other`.
-
-3. In the `Creation method` set it to `Custom pattern`.
-
-4. Copy the rule in [Event_Trigger.jason] in Event_Bridge_Trigger folder into the `Event pattern`.
-
-5. Set the target to the Lambda Function which user created in previous.
-
-![securityhub8](./ScreenShots/securityhub8.png)
-![securityhub9](./ScreenShots/securityhub9.png)
-
-### 4.1.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action
-1. Search for Security Hub and set it up.
-
-2. In the `Custom actions` choose to `Create custom action` and copy the `Custom action ARN`.
-
-![customaction0](./ScreenShots/customaction0.png)
-![customaction3](./ScreenShots/customaction3.png)
-
-3. Search for Event Bridge in AWS and set it up.
-
-4. In the `Build event pattern` set the `Event source` to `AWS events or EventBridge partner events`.
-
-5. In the `Creation method` set it to `Use pattern form`.
-
-6. Set the `AWS service` to `Security Hub`.
-
-7. Set the `Event type` to `Security Hub Findings - Custom Action`
-
-8. Choose `Specific custom action ARN(s)` and paste the copied ARN.
-
-9. Set the target to the Lambda Function which user created in previous.
-
-![customaction1](./ScreenShots/customaction1.png)
-![customaction2](./ScreenShots/customaction2.png)
-
-## 4.2 CloudFormation Stacksets Deployment - Organization Level
+## 4.1 CloudFormation Stacksets Deployment - Organization Level
 In this part, we will introduce three CloudFormation templates for deploying AWS resources at the organizational level.
 
 These templates will be deployed to each member account through the admin account to ensure that a corresponding AWS resource is created in each member account.
@@ -261,7 +159,7 @@ Part 1. AWS Config Deployment
 Part 2. Remediation Role Deployment
 Part 3. SNS Notification Deployment
 
-### 4.2.1 AWS Config Deployment
+### 4.1.1 AWS Config Deployment
 Since AWS Config is a regional resource, users in the corresponding region of their member accounts need to manually turn it on and set up the corresponding rules. Therefore, implementing this is not practical in large organizations.
 
 The remediation solution provides a CloudFormation template called [Auto_AWS_Config_Deployment](./CloudFormation_Depolyment/Auto_AWS_Config_Deployment.yml) to automatically enable AWS Config in all member accounts for the corresponding region.
@@ -297,7 +195,7 @@ The Record selected resource types option should only be enabled when neither of
 
 ![AWS Config4](./ScreenShots/awsconfig4.png)
 
-### 4.2.2 Remediation Role Deployment
+### 4.1.2 Remediation Role Deployment
 IAM Role being a global resource, users need to set up this role manually in each member account. Therefore, it is not practical to implement this feature in large organizations.
 
 The remediation solution provides an application called [Auto_Remediator_Role_Deployment](./CloudFormation_Depolyment/Auto_Remediator_Role_Deployment.yml) CloudFormation template to automatically create the IAM Role for remediation measures in all member accounts.
@@ -323,7 +221,7 @@ Since IAM roles are global resources selecting multiple regions will result in d
 
 ![IAM Role3](./ScreenShots/iamrole3.png)
 
-### 4.2.3 SNS Notification Deployment
+### 4.1.3 SNS Notification Deployment
 Since SNS Notification is a regional resource, users in the region corresponding to its member accounts need to open it manually and set up email addresses. Therefore, it is not practical to implement this feature in large organizations.
 
 The remediation solution provides an application called [Auto_SNS_Notification_Deployment] (. /CloudFormation_Depolyment/Auto_SNS_Notification_Deployment.yml) CloudFormation template to automatically enable SNS Notification in all member accounts of the corresponding region.
@@ -344,6 +242,105 @@ The remediation solution provides an application called [Auto_SNS_Notification_D
 
 6. Please go to the email address users set to confirm the subcription.
 
+## 4.2 Delegated Administrator Account Set Up - Account Level
+In this part users need to make some manual settings for the Delegated Administrator Account of Security Hub. 
+
+The reason for not automating this part of the setup is that users only need to make a few settings for one account.
+
+Part 1. Set the Member Account to be the Delegated Administrator Account for the Security Hub 
+Part 2. Set Configuration in the Delegated Administrator Account
+Part 3. Set Lambda Function in the Delegated Administrator Account
+Part 4. Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account
+Part 5. Set the Event Bridge in the Delegated Administrator Account
+
+### 4.2.1 Set the Member Account to be the Delegated Administrator Account for the Security Hub 
+1. Users need to enable Security Hub in the management account and then authorize one of the member accounts in the organization as a Delegated Administrator Account.
+
+![securityhub1](./ScreenShots/securityhub1.png)
+
+### 4.2.2 Set Configuration in the Delegated Administrator Account
+1. Set up Central Configuration in the Delegated Administrator Account to enable Security Hub in all member accounts and use CIS Benchmark V3.0.0 as a benchmark.
+
+![securityhub2](./ScreenShots/securityhub2.png)
+![securityhub3](./ScreenShots/securityhub3.png)
+
+### **🚨 Note:**
+*When selecting monitoring areas it is recommended to select only the desired areas. If all areas are selected, additional time may be required to complete the setup.*
+
+### 4.2.3 Set Lambda Function in the Delegated Administrator Account
+1. Search for Lambda Function in AWS and set it up in the following order
+`Create Function > Function name > Self-defined name > Runtime > python 3.8`
+
+2. Upload the [CISRemediation.zip](./Lambda_Function/CISRemediation.zip) in the Lambda_Function folder that contains all the functions used to automate the fix after the functions have been created.
+
+![securityhub4](./ScreenShots/securityhub4.png)
+
+3. Once the code is uploaded, users need to add a Trigger to the Lambda Function and set the Event Bridge as the source so that the findings can trigger the corresponding fix function. 
+
+![securityhub5](./ScreenShots/securityhub5.png)
+![securityhub6](./ScreenShots/securityhub6.png)
+
+4. Then users need to go to Configuration > General Configuration and set the Timeout as 30 sec. Otherwise some Lambda Functions can not execute in time.
+
+### 4.2.4 Modify Lambda Function IAM Role Permissions in the Delegated Administrator Account
+1. After successfully setting up the Lambda Function it automatically creates an IAM Role in the Delegated Administrator Account. Users will need to find this role and set up a separate permission for it in order to assume the Remediation Role in the other member accounts.
+
+2. After finding the corresponding IAM Role follow these steps to add the policy
+`Add permissions > Create inline policy > JSON > Copy the policy below > Name the policy as CISRemediation`
+
+3. ```json
+   {
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "CrossAccountRemediatorRoleAssumption",
+			"Effect": "Allow",
+			"Action": "sts:AssumeRole",
+			"Resource": "arn:aws:iam::*:role/CIS_Remediator_Role"
+		}
+   	]
+   }
+
+![securityhub7](./ScreenShots/securityhub7.png)
+
+### 4.2.5 Set the Event Bridge in the Delegated Administrator Account for Auto Remediation
+1. Search for Event Bridge in AWS and choose `Create rule`.
+
+2. In the `Build event pattern` set the `Event source` to `Other`.
+
+3. In the `Creation method` set it to `Custom pattern`.
+
+4. Copy the rule in [Event_Trigger.jason] in Event_Bridge_Trigger folder into the `Event pattern`.
+
+5. Set the target to the Lambda Function which user created in previous.
+
+![securityhub8](./ScreenShots/securityhub8.png)
+![securityhub9](./ScreenShots/securityhub9.png)
+
+### 4.2.6 Set the Event Bridge in the Delegated Administrator Account for Custom Action
+1. Search for Security Hub and set it up.
+
+2. In the `Custom actions` choose to `Create custom action` and copy the `Custom action ARN`.
+
+![customaction0](./ScreenShots/customaction0.png)
+![customaction3](./ScreenShots/customaction3.png)
+
+3. Search for Event Bridge in AWS and set it up.
+
+4. In the `Build event pattern` set the `Event source` to `AWS events or EventBridge partner events`.
+
+5. In the `Creation method` set it to `Use pattern form`.
+
+6. Set the `AWS service` to `Security Hub`.
+
+7. Set the `Event type` to `Security Hub Findings - Custom Action`
+
+8. Choose `Specific custom action ARN(s)` and paste the copied ARN.
+
+9. Set the target to the Lambda Function which user created in previous.
+
+![customaction1](./ScreenShots/customaction1.png)
+![customaction2](./ScreenShots/customaction2.png)
 
 ### **🚨 Note:**
 *The following deployment method is optional. The user only need to choose one way to deploy.*
@@ -630,4 +627,3 @@ I would like to express our gratitude to our mentor and the other contributor of
 	- [Yarui Qiu](https://github.com/LottieQ)
 - TA:
 	- [Prasanna Aravindan](https://github.com/prasanna7401)
-
